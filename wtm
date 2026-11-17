@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Launcher: runs wtm from this directory's uv project, from wherever you call it.
+# Symlink it onto your PATH, e.g.:  ln -s ~/scripts/wtm/wtm ~/.local/bin/wtm
+set -euo pipefail
+DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+exec uv run --quiet --project "$DIR" wtm "$@"

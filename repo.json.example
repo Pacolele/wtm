@@ -1,0 +1,14 @@
+{
+  "defaults": {
+    "command": "kiro-cli chat"
+  },
+  "repos": {
+    "myproject": {
+      "path": "~/projects/myproject",
+      "agent": "myagent"
+    }
+  },
+  "settings": {
+    "theme": "catppuccin-macchiato"
+  }
+}
