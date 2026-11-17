@@ -38,7 +38,7 @@ The first start creates `.venv` in the project folder.
 | `?` | Settings (theme picker) |
 | `q` | Quit |
 
-**Worktree list.** The worktrees of the selected repo, with branch and state (changes, prunable).
+**Worktree list.** The worktrees of the selected repo, with the branch and a state: `clean`, or the number of changed files, commits ahead (↑) or behind (↓), `locked`, or `missing`.
 
 | Key | Action |
 |-----|--------|
@@ -60,7 +60,7 @@ The worktree is created in `<worktree_root>/<branch>`, with `/` in the branch na
 By default `worktree_root` is `<repo path>-wt`, next to the repo. After deleting a worktree, wtm
 tries `git branch -d`, which keeps unmerged branches.
 
-Inside tmux, wtm renames its window to the repo name while it runs and restores it afterwards.
+Inside tmux, `Enter` renames the window to the branch name while the agent runs and restores it afterwards. `t` names the new window `<repo>:<branch>`.
 Panes it opens report the agent's state (idle, working, done, blocked, error) in the tmux pane
 option `@agent-state`, which you can show in your status bar. This works with agents that report their
 state with the OSC 7501 terminal sequence, such as kiro-cli.
