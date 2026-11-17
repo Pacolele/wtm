@@ -44,6 +44,8 @@ The first start creates `.venv` in the project folder.
 |-----|--------|
 | `Enter` | Run the agent in the selected worktree, in the current terminal. wtm resumes when it exits |
 | `t` | Run the agent in a new tmux window (only inside tmux) |
+| `e` | Open the selected worktree in your editor (`nvim .`), in the current terminal. wtm resumes when it exits |
+| `E` | Open the editor in a new tmux window (only inside tmux) |
 | `n` | New worktree: type a branch name |
 | `d` | Delete the selected worktree (asks first, and offers a force remove if it has changes) |
 | `p` | `git worktree prune` |
@@ -71,7 +73,7 @@ state with the OSC 7501 terminal sequence, such as kiro-cli.
 |---------|--------------|
 | `wtm` | Start the TUI |
 | `wtm list` | List registered repos |
-| `wtm add NAME PATH [--agent AGENT] [--command CMD] [--worktree-root DIR]` | Register a repo, or update it if the name exists |
+| `wtm add NAME PATH [--agent AGENT] [--command CMD] [--editor EDITOR] [--worktree-root DIR]` | Register a repo, or update it if the name exists |
 | `wtm remove NAME` | Unregister a repo (nothing is deleted on disk) |
 
 `PATH` must be a git repository.
@@ -84,12 +86,13 @@ The file is created the first time you add a repo. See `repo.json.example`:
 
 ```json
 {
-  "defaults": { "command": "kiro-cli chat" },
+  "defaults": { "command": "kiro-cli chat", "editor": "nvim" },
   "repos": {
     "myproject": {
       "path": "~/projects/myproject",
       "agent": "myagent",
       "command": "kiro-cli chat",
+      "editor": "nvim",
       "worktree_root": "~/projects/myproject-wt"
     }
   },
@@ -103,6 +106,8 @@ The file is created the first time you add a repo. See `repo.json.example`:
 | `repos.<name>.path` | Main checkout of the repo (required) |
 | `repos.<name>.agent` | Appended to the command as `--agent NAME` |
 | `repos.<name>.command` | Replaces `defaults.command` for this repo |
+| `defaults.editor` | Editor for every repo, started as `<editor> .` in the worktree. Default: `$VISUAL`, then `$EDITOR`, then `vi` |
+| `repos.<name>.editor` | Replaces `defaults.editor` for this repo |
 | `repos.<name>.worktree_root` | Where new worktrees go. Default: `<path>-wt` |
 | `settings.theme` | Set from the `?` menu. One of `nord`, `catppuccin-mocha`, `catppuccin-latte`, `catppuccin-frappe`, `catppuccin-macchiato`, `rose-pine` |
 

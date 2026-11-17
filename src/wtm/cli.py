@@ -21,6 +21,8 @@ def cmd_list(config: Config) -> int:
             bits.append(f"agent={r.agent}")
         if r.command:
             bits.append(f"command={r.command!r}")
+        if r.editor:
+            bits.append(f"editor={r.editor!r}")
         print("  ".join(bits))
     return 0
 
@@ -36,6 +38,7 @@ def cmd_add(config: Config, args: argparse.Namespace) -> int:
         path=path,
         agent=args.agent or (existing.agent if existing else ""),
         command=args.command or (existing.command if existing else ""),
+        editor=args.editor or (existing.editor if existing else ""),
         worktree_root=args.worktree_root or (existing.worktree_root if existing else ""),
         extra=existing.extra if existing else {},
     )
@@ -65,6 +68,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_add.add_argument("path", help="Path to the repo's main checkout")
     p_add.add_argument("--agent", default="", help="kiro-cli agent profile to launch with (--agent NAME)")
     p_add.add_argument("--command", default="", help="Override the launch command (default: kiro-cli chat)")
+    p_add.add_argument("--editor", default="", help="Editor to open worktrees with (default: $VISUAL, $EDITOR, vi)")
     p_add.add_argument("--worktree-root", default="", help="Where new worktrees are created (default: <path>-wt)")
 
     p_remove = sub.add_parser("remove", help="Unregister a repo")

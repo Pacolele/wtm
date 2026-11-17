@@ -280,6 +280,7 @@ class RepoFormScreen(ModalScreen[Repo | None]):
                 path=path,
                 agent=agent,
                 command=old.command if old else "",
+                editor=old.editor if old else "",
                 worktree_root=old.worktree_root if old else "",
                 extra=old.extra if old else {},
             )
@@ -409,6 +410,8 @@ class WorktreeScreen(Screen[None]):
     BINDINGS = [
         Binding("enter", "launch", "Launch", priority=True),
         Binding("t", "launch_tmux", "Launch in tmux"),
+        Binding("e", "edit", "Editor"),
+        Binding("E", "edit_tmux", "Editor in tmux"),
         Binding("n", "new_worktree", "New"),
         Binding("d", "delete_worktree", "Delete"),
         Binding("p", "prune", "Prune"),
@@ -476,15 +479,29 @@ class WorktreeScreen(Screen[None]):
         await self.refresh_cards()
 
     def action_launch_tmux(self) -> None:
+        self._open_in_tmux(self.repo.launch_command(self.config.default_command), "")
+
+    async def action_edit(self) -> None:
+        wt = self._selected()
+        if wt is None:
+            return
+        command = self.repo.editor_command(self.config.default_editor)
+        with self.app.suspend(), launch.renamed_tmux_window(wt.label):
+            launch.run_here(command, wt.path)
+        await self.refresh_cards()
+
+    def action_edit_tmux(self) -> None:
+        self._open_in_tmux(self.repo.editor_command(self.config.default_editor), "edit ")
+
+    def _open_in_tmux(self, command: str, prefix: str) -> None:
         wt = self._selected()
         if wt is None:
             return
         if not launch.in_tmux():
             self.notify("Not inside tmux (or tmux not found)", severity="error")
             return
-        command = self.repo.launch_command(self.config.default_command)
         try:
-            launch.tmux_window(f"{self.repo.name}:{wt.label}", command, wt.path)
+            launch.tmux_window(f"{prefix}{self.repo.name}:{wt.label}", command, wt.path)
         except RuntimeError as e:
             self.notify(str(e), severity="error")
             return

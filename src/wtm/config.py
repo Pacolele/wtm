@@ -5,13 +5,14 @@ Override the location with the ``WTM_CONFIG`` environment variable.
 Format::
 
     {
-      "defaults": {"command": "kiro-cli chat"},
+      "defaults": {"command": "kiro-cli chat", "editor": "nvim"},
       "settings": {"theme": "nord"},          # set from the '?' menu in the TUI
       "repos": {
         "myproject": {
           "path": "~/projects/myproject",
           "agent": "myagent",                       # optional: appended as `--agent myagent`
           "command": "kiro-cli chat",             # optional: overrides defaults.command
+          "editor": "nvim",                       # optional: overrides defaults.editor
           "worktree_root": "~/projects/myproject-wt"  # optional: default "<repo parent>/<name>-wt"
         }
       }
@@ -29,7 +30,7 @@ from pathlib import Path
 from typing import Any
 
 BUILTIN_COMMAND = "kiro-cli chat"
-_KNOWN = ("path", "agent", "command", "worktree_root")
+_KNOWN = ("path", "agent", "command", "editor", "worktree_root")
 
 
 def config_path() -> Path:
@@ -54,6 +55,7 @@ class Repo:
     path: Path
     agent: str = ""
     command: str = ""
+    editor: str = ""
     worktree_root: str = ""
     extra: dict[str, Any] = field(default_factory=dict)  # unknown keys, round-tripped untouched
 
@@ -61,6 +63,10 @@ class Repo:
         """Shell command line that starts the coding agent for this repo."""
         cmd = self.command or default
         return f"{cmd} --agent {self.agent}" if self.agent else cmd
+
+    def editor_command(self, default: str) -> str:
+        """Shell command line that opens the current directory in the editor."""
+        return f"{self.editor or default} ."
 
     @property
     def resolved_worktree_root(self) -> Path:
@@ -92,6 +98,12 @@ class Config:
         return (self.data.get("defaults") or {}).get("command") or BUILTIN_COMMAND
 
     @property
+    def default_editor(self) -> str:
+        """``defaults.editor``, else $VISUAL, else $EDITOR, else vi."""
+        configured = (self.data.get("defaults") or {}).get("editor")
+        return configured or os.environ.get("VISUAL") or os.environ.get("EDITOR") or "vi"
+
+    @property
     def theme(self) -> str:
         return (self.data.get("settings") or {}).get("theme") or ""
 
@@ -110,6 +122,7 @@ class Config:
                     path=Path(entry["path"]).expanduser(),
                     agent=entry.get("agent", ""),
                     command=entry.get("command", ""),
+                    editor=entry.get("editor", ""),
                     worktree_root=entry.get("worktree_root", ""),
                     extra={k: v for k, v in entry.items() if k not in _KNOWN},
                 )
@@ -125,7 +138,7 @@ class Config:
         if original_name and original_name != repo.name:
             repos.pop(original_name, None)
         entry: dict[str, Any] = {"path": collapse_home(repo.path)}
-        for key in ("agent", "command", "worktree_root"):
+        for key in ("agent", "command", "editor", "worktree_root"):
             value = getattr(repo, key)
             if value:
                 entry[key] = value

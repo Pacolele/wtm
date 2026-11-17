@@ -1,6 +1,7 @@
 {
   "defaults": {
-    "command": "kiro-cli chat"
+    "command": "kiro-cli chat",
+    "editor": "nvim"
   },
   "repos": {
     "myproject": {
